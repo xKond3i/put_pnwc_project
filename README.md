@@ -7,7 +7,7 @@ The goal is to claim the victory by developing the greatest village on the map. 
 
 ## Powered by
 
-  [![SFML logo](https://www.sfml-dev.org/images/logo.png)](https://www.sfml-dev.org)
+  [![Allegro Game Programming Library logo](https://liballeg.org/images/logo.png)](https://liballeg.org/)
 
 ## Acknowledgments
 
