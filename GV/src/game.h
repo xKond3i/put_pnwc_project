@@ -1,5 +1,4 @@
-#ifndef GAME_H
-#define GAME_H
+#pragma once
 
 #include <stdio.h>
 
@@ -8,5 +7,3 @@
 
 void update_loop();
 void handle_events(ALLEGRO_EVENT* event, bool* running);
-
-#endif
