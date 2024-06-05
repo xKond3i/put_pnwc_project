@@ -6,9 +6,9 @@ The rules are simple: roll the dice
 gather and manage resources, buy and build roads and houses. 🎲 \
 The goal is to claim the victory by developing the greatest village on the map. 👑
 
-## Powered by
+## Preview
 
-  [![Allegro Game Programming Library logo](https://liballeg.org/images/logo.png)](https://liballeg.org/)
+  ![Preview](preview.png)
 
 ## Maps File Format
 Map is defined in a CSV (Comma Separated Values) file named "map.csv". \
@@ -29,6 +29,10 @@ keycode | field type
 "3"     | WHEAT
 "4"     | ORE
 "5"     | SHEEP
+
+## Powered by
+
+  [![Allegro Game Programming Library logo](https://liballeg.org/images/logo.png)](https://liballeg.org/)
 
 ## Acknowledgments
 
