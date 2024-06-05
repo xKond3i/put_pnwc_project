@@ -30,6 +30,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
+    <None Include="map.csv" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\map.h">

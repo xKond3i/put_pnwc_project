@@ -1,4 +1,6 @@
 #include <stdio.h>
+#include <stdlib.h>
+#include <time.h>
 
 #include <allegro5/allegro.h>
 #include <allegro5/allegro_primitives.h>
@@ -42,13 +44,14 @@ int main()
     al_register_event_source(queue, al_get_display_event_source(display));
 
     // init game modules
-    init_map(display);
+    if (!init_map(display)) return 0;
 
     // load resources
     font = al_load_ttf_font("resources/arial.ttf", 32, 0);
 
     // * MAIN GAME LOOP
     al_start_timer(timer);
+    srand(time(NULL));
     bool running = true;
     while (running) {
         // handle events
