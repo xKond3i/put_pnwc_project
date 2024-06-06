@@ -162,8 +162,7 @@ void generate_map(ALLEGRO_DISPLAY* display) {
 	for (int row = 0; row < MAP_ROWS + 1; ++row) {
 		for (int col = 0; col < MAP_COLS; ++col) {
 			if (row % 2 == 0) { // for even rows
-				if (!(MAP_ROWS % 2 == 0 && row == MAP_ROWS && col == 0)) // edge case: even number of rows
-					grid_vertices[pos++] = (POINT){ col * MAP_CELL_SIZE,				   y * MAP_CELL_SIZE + MAP_CELL_SIZE * 0.25 };
+				grid_vertices[pos++] = (POINT){ col * MAP_CELL_SIZE,				   y * MAP_CELL_SIZE + MAP_CELL_SIZE * 0.25 };
 				grid_vertices[pos++] = (POINT){ col * MAP_CELL_SIZE + MAP_CELL_SIZE * 0.5, y * MAP_CELL_SIZE };
 			}
 			else { // for odd rows
@@ -336,34 +335,34 @@ void generate_map(ALLEGRO_DISPLAY* display) {
 				print_vertex_data(pos, "last row (edge case: even number of rows)", parents[0], parents[1], parents[2], neighbors[0], neighbors[1], neighbors[2]);
 			#endif
 		}
-		// most cases
+		// most cases (in the center)
 		// even vertex: bottom, top, right hexes
 		else if (pos % 2 == 0) {
 			// parents
 			parents[0] = (row-1) * MAP_COLS + (col / 2) - (row / 2); // top
-			if (col != 1 && row != 0) parents[1] = parents[0] + MAP_COLS - 1; // left
-			if (col != VERTICES_IN_ROW - 2 && row != 0) parents[2] = parents[0] + MAP_COLS; // right
+			if (col != 1) parents[1] = parents[0] + MAP_COLS - 1; // left
+			if (col != VERTICES_IN_ROW - 2) parents[2] = parents[0] + MAP_COLS; // right
 
 			// neighbors
 			neighbors[0] = pos + VERTICES_IN_ROW; // bottom
-			if (col != 1 && row != 0) neighbors[1] = pos - 1; // left
-			if (col != VERTICES_IN_ROW - 1 && row != 0) neighbors[2] = pos + 1; // right
+			neighbors[1] = pos - 1; // left
+			neighbors[2] = pos + 1; // right
 
 			#ifdef _DEBUG_GRID_EXTRA_OUT
 				print_vertex_data(pos, "most cases (even)", parents[0], parents[1], parents[2], neighbors[0], neighbors[1], neighbors[2]);
 			#endif
 		}
-		// most cases
+		// most cases (in the center)
 		// odd vertex: bottom, left, right hexes
 		else if (pos % 2 == 1) {
 			parents[0] = row * MAP_COLS + (col / 2) - (row / 2) - (row % 2); // bottom
-			if (col != 1 && row != 0) parents[1] = parents[0] - MAP_COLS; // left
-			if (col != VERTICES_IN_ROW - 2 && row != 0) parents[2] = parents[0] - MAP_COLS + 1; // right
+			if (col != 1) parents[1] = parents[0] - MAP_COLS; // left
+			if (col != VERTICES_IN_ROW - 2) parents[2] = parents[0] - MAP_COLS + 1; // right
 
 			// neighbors
 			neighbors[0] = pos - VERTICES_IN_ROW; // top
-			if (col != 1 && row != 0) neighbors[1] = pos - 1; // left
-			if (col != VERTICES_IN_ROW - 1 && row != 0) neighbors[2] = pos + 1; // right
+			neighbors[1] = pos - 1; // left
+			neighbors[2] = pos + 1; // right
 
 			#ifdef _DEBUG_GRID_EXTRA_OUT
 				print_vertex_data(pos, "most cases (odd)", parents[0], parents[1], parents[2], neighbors[0], neighbors[1], neighbors[2]);
@@ -504,7 +503,7 @@ void draw_map(ALLEGRO_DISPLAY* display, ALLEGRO_FONT* font)
 	// draw tiles
 	for (int pos = 0; pos < MAX_TILES - 1; ++pos) {
 		draw_hex(board.tiles[pos], font);
-		// display tile index
+		// [DEBIG] SHOW TILE INDEXES
 		//#ifdef _DEBUG_SHOW_GRIDS)
 		//	char str[4];
 		//	_itoa_s(pos, str, 4, 10);
@@ -512,11 +511,10 @@ void draw_map(ALLEGRO_DISPLAY* display, ALLEGRO_FONT* font)
 		//#endif
 	}
 
-	#ifdef _DEBUG_SHOW_GRIDS
 	// [DEBUG] SHOW SQUARE BOUNDING BOXES
+	#ifdef _DEBUG_SHOW_GRIDS
 	for (int i = 0; i < MAX_TILES; ++i)
-		if (board.tiles[i]. type != WATER)
-			draw_bounding_box(board.tiles[i]);
+		draw_bounding_box(board.tiles[i]);
 	#endif
 }
 
@@ -536,7 +534,7 @@ void draw_vertices(ALLEGRO_DISPLAY* display, ALLEGRO_FONT* font, int selected) {
 
 #ifdef _DEBUG_SHOW_GRIDS
 	void draw_bounding_box(HEX hex) {
-		//if (hex.type == WATER) return;
+		if (hex.type == WATER) return;
 
 		float x = hex.x + grid_offset.x;
 		float y = hex.y + grid_offset.y;

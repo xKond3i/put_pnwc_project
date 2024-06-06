@@ -1,5 +1,7 @@
 #include "game.h"
 
+int selected = -1;
+
 void update_loop(ALLEGRO_EVENT* event, ALLEGRO_DISPLAY* display, ALLEGRO_FONT* font)
 {
     // update loop (when timer ticks)
