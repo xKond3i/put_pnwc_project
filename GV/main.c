@@ -49,6 +49,9 @@ int main()
     // load resources
     font = al_load_ttf_font("resources/arial.ttf", 32, 0);
 
+    // PRELOOP
+    draw_map(display, font, selected);
+
     // * MAIN GAME LOOP
     al_start_timer(timer);
     srand(time(NULL));
@@ -58,11 +61,7 @@ int main()
         ALLEGRO_EVENT event;
         al_wait_for_event(queue, &event);
         handle_events(&event, &running);
-        // update loop (when timer ticks)
-        if (event.type == ALLEGRO_EVENT_TIMER) {
-            draw_map(display, font);
-            update_loop();
-        }
+        update_loop(&event, display, font);
     }
 
     // clear pointers to free memory

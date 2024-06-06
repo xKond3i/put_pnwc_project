@@ -15,7 +15,7 @@ Map is defined in a CSV (Comma Separated Values) file named "map.csv". \
 Structure of this file consists of:
 first row (header): | `MAP_ROWS`,`MAP_COLS`
 --------------------|---------------------------------------------
-odd rows:           | `TYPE` x `MAP_COLS` (separated by ",")
+even rows:          | `TYPE` x `MAP_COLS` (separated by ",")
 odd rows:           | `TYPE` x (`MAP_COLS` - 1) (separated by ",")
 
 where `TYPE` might be:
@@ -23,7 +23,7 @@ keycode | field type
 --------|-----------
 "R"     | *RANDOM*
 "W"     | *WATER*
-"0"     | *DESERT*
+"0"     | DESERT
 "1"     | WOOD
 "2"     | BRICKS
 "3"     | WHEAT

@@ -1,5 +1,15 @@
 ﻿#pragma once
 
+// ! worth looking: https://stackoverflow.com/a/16874550
+// ! worth looking: https://www.redblobgames.com/grids/hexagons
+
+// debug extras
+#if _DEBUG
+#define _DEBUG_SHOW_GRIDS
+#define _DEBUG_FILE_EXTRA_OUT
+#define _DEBUG_GRID_EXTRA_OUT
+#endif
+
 // includes
 #include <stdio.h>
 #include <stdlib.h>
@@ -13,7 +23,8 @@
 
 // resources enumerations
 typedef enum { WATER, DESERT, WOOD, BRICK, WHEAT, ORE, SHEEP } ResourceType;
-typedef enum { NONE, SETTLEMENT, CITY };
+typedef enum { NONE, SETTLEMENT, CITY } PlacementType;
+typedef enum { NOONE, P1, P2, P3, P4 } Player;
 
 // 🎨 design definitions
 extern ALLEGRO_COLOR ResourceColor[7];
@@ -21,8 +32,8 @@ extern ALLEGRO_COLOR ResourceColor[7];
 // types
 typedef struct { float x; float y; } POINT;
 typedef struct { float x; float y; ResourceType type; int value; } HEX;
-typedef struct { float x; float y; int player; int building; } PLACEMENT;
-typedef struct { POINT start; POINT end; int player; } ROADS;
+typedef struct { float x; float y; int player; PlacementType building; int neighbors[3]; int parents[3]; bool active; } PLACEMENT;
+typedef struct { POINT start; POINT end; Player player; } ROADS;
 typedef struct { HEX* tiles; PLACEMENT* placements; ROADS* roads; } BOARD;
 
 // map config
@@ -49,12 +60,16 @@ extern BOARD board;
 // functionalities
 void free_map();
 bool init_map(ALLEGRO_DISPLAY* display);
-bool load_map_from_file();
+bool load_map_from_file(char* fname, bool extra_debug);
 void generate_map(ALLEGRO_DISPLAY* display);
 void draw_hex(HEX hex, ALLEGRO_FONT* font);
 void draw_map(ALLEGRO_DISPLAY* display, ALLEGRO_FONT* font);
+void draw_vertices(ALLEGRO_DISPLAY* display, ALLEGRO_FONT* font, int selected);
 
 // DEBUG functionalities
-#if _DEBUG
-void draw_bounding_box(HEX hex);
+#ifdef _DEBUG_SHOW_GRIDS
+	void draw_bounding_box(HEX hex);
+#endif
+#ifdef _DEBUG_GRID_EXTRA_OUT
+	void print_vertex_data(int pos, char* title, int p0, int p1, int p2, int n0, int n1, int n2);
 #endif

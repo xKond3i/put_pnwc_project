@@ -1,3 +1,4 @@
 GV/packages/*
 GV/build/*
 GV/.vs/*
+CLOC.py
