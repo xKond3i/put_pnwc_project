@@ -38,5 +38,6 @@ void next_turn();
 // drawing
 void draw_dice(ALLEGRO_DISPLAY* display, ALLEGRO_FONT* font);
 void draw_turn_info(ALLEGRO_DISPLAY* display, ALLEGRO_FONT* font);
+void draw_cards(ALLEGRO_DISPLAY* display, ALLEGRO_FONT* font, int shift, const int* cards, char* title, ALLEGRO_COLOR color);
 void draw_bank_cards(ALLEGRO_DISPLAY* display, ALLEGRO_FONT* font);
 void draw_player_cards(ALLEGRO_DISPLAY* display, ALLEGRO_FONT* font);
