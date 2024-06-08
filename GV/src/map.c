@@ -2,7 +2,7 @@
 
 // resources
 const int RESOURCES_COUNT = 5;
-const char RESOURCES_NAMES[5][10] = {"WOOD", "BRICKS", "WHEAT", "ORE", "SHEEP"};
+const char RESOURCES_NAMES[5][10] = {"wood", "bricks", "wheat", "ore", "sheep"};
 
 // 🎨 design definitions
 ALLEGRO_COLOR ResourceColor[7];
@@ -154,7 +154,8 @@ void generate_map(ALLEGRO_DISPLAY* display) {
 			int type = rand() % 5 + 2; // DEFAULT (R)
 			if (terrain[pos] == 'W') type = WATER;
 			else if (terrain[pos] != 'R') type = (int)terrain[pos] - (int)'0' + 1;
-			board.tiles[pos] = (HEX){ grid_bounding[pos].x, grid_bounding[pos].y, type, rand() % 12 + 1 };
+			int value = (type == WATER || type == DESERT) ? -1 : rand() % 11 + 2;
+			board.tiles[pos] = (HEX){ grid_bounding[pos].x, grid_bounding[pos].y, type, value };
 
 			pos++;
 		}
@@ -431,7 +432,8 @@ bool init_map(ALLEGRO_DISPLAY* display)
 {
 	// basic game values
 	ResourceColor[0] = al_map_rgb(46, 128, 213);  // water
-	ResourceColor[1] = al_map_rgb(225, 181, 104); // blank
+	//ResourceColor[1] = al_map_rgb(174, 139, 80);  // desert
+	ResourceColor[1] = al_map_rgb(225, 181, 104); // desert
 	ResourceColor[2] = al_map_rgb(18, 150, 57);   // wood
 	ResourceColor[3] = al_map_rgb(228, 104, 41);  // bricks
 	ResourceColor[4] = al_map_rgb(241, 183, 25);  // wheat
@@ -466,7 +468,7 @@ void free_map()
 	free(grid_vertices);
 }
 
-void draw_hex(HEX hex, ALLEGRO_FONT* font)
+void draw_hex(HEX hex, ALLEGRO_FONT* font, bool overlay)
 {
 	if (hex.type == WATER) return;
 
@@ -492,21 +494,29 @@ void draw_hex(HEX hex, ALLEGRO_FONT* font)
 	if (hex.type != DESERT) {
 		char value[4];
 		_itoa_s(hex.value, value, 4, 10);
-		al_draw_filled_rounded_rectangle(x + MAP_CELL_SIZE / 4, y + MAP_CELL_SIZE / 2 - MAP_CELL_SIZE / 8, x + MAP_CELL_SIZE * 3/4, y + MAP_CELL_SIZE / 2 + MAP_CELL_SIZE / 8, 8, 8, al_map_rgb(255, 255, 255));
+		al_draw_filled_rounded_rectangle(x + MAP_CELL_SIZE / 4, y + MAP_CELL_SIZE / 2 - MAP_CELL_SIZE / 8, x + MAP_CELL_SIZE * 3 / 4, y + MAP_CELL_SIZE / 2 + MAP_CELL_SIZE / 8, 8, 8, al_map_rgb(255, 255, 255));
 		al_draw_text(font, al_map_rgb(0, 0, 0), x + MAP_CELL_SIZE / 2, y + MAP_CELL_SIZE / 2 - al_get_font_line_height(font) / 2, ALLEGRO_ALIGN_CENTER, value);
+	
+		if (overlay) {
+			for (int i = 0; i < 6; i++) {
+				int next = (i + 1) % 6;
+				al_draw_filled_triangle(x + MAP_CELL_SIZE / 2, y + MAP_CELL_SIZE / 2, vertices[i * 2], vertices[i * 2 + 1], vertices[next * 2], vertices[next * 2 + 1], al_map_rgba(0, 0, 0, 128));
+			}
+		}
 	}
 
 	// draw road (outline)
 	al_draw_polygon(vertices, 6, ALLEGRO_LINE_JOIN_BEVEL, ResourceColor[DESERT], MAP_ROAD_THICKNESS, 0.0);
+	//al_draw_polygon(vertices, 6, ALLEGRO_LINE_JOIN_BEVEL, al_map_rgb(225, 181, 104), MAP_ROAD_THICKNESS, 0.0);
 }
 
-void draw_map(ALLEGRO_DISPLAY* display, ALLEGRO_FONT* font)
+void draw_map(ALLEGRO_DISPLAY* display, ALLEGRO_FONT* font, int dices)
 {
 	al_clear_to_color(ResourceColor[WATER]);
 
 	// draw tiles
 	for (int pos = 0; pos < MAX_TILES - 1; ++pos) {
-		draw_hex(board.tiles[pos], font);
+		draw_hex(board.tiles[pos], font, dices == board.tiles[pos].value);
 		// [DEBIG] SHOW TILE INDEXES
 		//#ifdef _DEBUG_SHOW_GRIDS)
 		//	char str[4];
@@ -522,15 +532,17 @@ void draw_map(ALLEGRO_DISPLAY* display, ALLEGRO_FONT* font)
 	#endif
 }
 
-void draw_vertices(ALLEGRO_DISPLAY* display, ALLEGRO_FONT* font, int selected) {
+void draw_vertices(ALLEGRO_DISPLAY* display, ALLEGRO_FONT* font, int selected, ALLEGRO_COLOR player_color) {
 	// [DEBUG] SHOW ALL VERTICES
 	for (int i = 0; i < MAX_VERTICES; ++i) {
 		PLACEMENT v = board.placements[i];
 		if (v.active == false) continue;
-		ALLEGRO_COLOR color = al_map_rgb(255, 0, 0);
+		ALLEGRO_COLOR color = player_color;
 		if (selected != -1) {
-			if (i == selected) color = al_map_rgb(0, 0, 255);
-			else if (i == board.placements[selected].neighbors[0] || i == board.placements[selected].neighbors[1] || i == board.placements[selected].neighbors[2]) color = al_map_rgb(128, 0, 128);
+			if (i == selected) color = al_map_rgb(255, 255, 255);
+			else if (i == board.placements[selected].neighbors[0] || i == board.placements[selected].neighbors[1] || i == board.placements[selected].neighbors[2]) {
+				color = al_map_rgb((255 + player_color.r * 255) * 0.5, (255 + player_color.g * 255) * 0.5, (255 + player_color.b * 255) * 0.5);
+			}
 		}
 		al_draw_filled_circle(v.x + grid_offset.x, v.y + grid_offset.y, 8, color);
 	}

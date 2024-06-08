@@ -10,13 +10,17 @@
 float mouse_x;
 float mouse_y;
 
+int map_update_counter;
+
 extern int selected;
 
 extern const int MAX_TYPE_CARDS;
 extern int bank_cards[5];
 
-extern ALLEGRO_COLOR playerColors[4];
+extern ALLEGRO_COLOR PlayerColors[4];
 extern const int MAX_PLAYERS;
+extern int player_cards[4][5];
+extern int player_points[4];
 extern int current_player;
 extern int turn_nr;
 extern int dices[2];
@@ -35,3 +39,4 @@ void next_turn();
 void draw_dice(ALLEGRO_DISPLAY* display, ALLEGRO_FONT* font);
 void draw_turn_info(ALLEGRO_DISPLAY* display, ALLEGRO_FONT* font);
 void draw_bank_cards(ALLEGRO_DISPLAY* display, ALLEGRO_FONT* font);
+void draw_player_cards(ALLEGRO_DISPLAY* display, ALLEGRO_FONT* font);

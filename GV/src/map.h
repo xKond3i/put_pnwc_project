@@ -67,9 +67,9 @@ bool load_map_from_file(char* fname, bool extra_debug);
 void generate_map(ALLEGRO_DISPLAY* display);
 
 // drawing
-void draw_hex(HEX hex, ALLEGRO_FONT* font);
-void draw_map(ALLEGRO_DISPLAY* display, ALLEGRO_FONT* font);
-void draw_vertices(ALLEGRO_DISPLAY* display, ALLEGRO_FONT* font, int selected);
+void draw_hex(HEX hex, ALLEGRO_FONT* font, bool overlay);
+void draw_map(ALLEGRO_DISPLAY* display, ALLEGRO_FONT* font, int dices);
+void draw_vertices(ALLEGRO_DISPLAY* display, ALLEGRO_FONT* font, int selected, ALLEGRO_COLOR player_color);
 
 // DEBUG functionalities
 #ifdef _DEBUG_SHOW_GRIDS

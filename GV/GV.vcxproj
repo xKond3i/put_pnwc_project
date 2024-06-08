@@ -182,7 +182,7 @@
     <ResourceCompile Include="GV.rc" />
   </ItemGroup>
   <ItemGroup>
-    <Image Include="icon1.ico" />
+    <Image Include="icon.ico" />
     <Image Include="resources\icon.ico" />
     <Image Include="resources\logo.ico" />
     <Image Include="resources\logo.png" />

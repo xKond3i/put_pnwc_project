@@ -5,8 +5,10 @@ int selected = -1;
 const int MAX_TYPE_CARDS = 19;
 int bank_cards[5];
 
-ALLEGRO_COLOR playerColors[4];
+ALLEGRO_COLOR PlayerColors[4];
 const int MAX_PLAYERS = 4;
+int player_cards[4][5];
+int player_points[4];
 int current_player;
 int turn_nr;
 int dices[2];
@@ -14,6 +16,11 @@ int dices[2];
 bool init_game(ALLEGRO_DISPLAY* display, ALLEGRO_FONT* font)
 {
     if (!init_map(display)) return 0;
+
+    PlayerColors[0] = al_map_rgb(196, 0, 0);
+    PlayerColors[1] = al_map_rgb(0, 0, 196);
+    PlayerColors[2] = al_map_rgb(0, 128, 0);
+    PlayerColors[3] = al_map_rgb(128, 0, 196);
 
     restart_game(display, font);
 }
@@ -24,12 +31,16 @@ void clear_game_mem() {
 
 void restart_game(ALLEGRO_DISPLAY* display, ALLEGRO_FONT* font)
 {
-    for (int i = 0; i < RESOURCES_COUNT; ++i) { bank_cards[i] = MAX_TYPE_CARDS; }
+    // reset bank stats
+    for (int i = 0; i < RESOURCES_COUNT; ++i)
+        bank_cards[i] = MAX_TYPE_CARDS;
 
-    playerColors[0] = al_map_rgb(255, 0, 0);
-    playerColors[1] = al_map_rgb(0, 0, 255);
-    playerColors[2] = al_map_rgb(255, 128, 48);
-    playerColors[3] = al_map_rgb(128, 0, 255);
+    // reset player stats
+    for (int p = 0; p < MAX_PLAYERS; ++p) {
+        player_points[p] = 0;
+        for (int i = 0; i < RESOURCES_COUNT; ++i)
+            player_cards[p][i] = 0;
+    }
 
     draw_map(display, font, selected);
 
@@ -41,14 +52,27 @@ void restart_game(ALLEGRO_DISPLAY* display, ALLEGRO_FONT* font)
 // LOGIC
 void update_loop(ALLEGRO_EVENT* event, ALLEGRO_DISPLAY* display, ALLEGRO_FONT* font)
 {
-    // ui
-    draw_turn_info(display, font);
-    //draw_bank_cards(display, font);
-
     // update loop (when timer ticks)
     if (event->type == ALLEGRO_EVENT_TIMER) {
-        draw_vertices(display, font, selected);
+        if (map_update_counter == 0) draw_map(display, font, turn_nr <= MAX_PLAYERS ? -1 : dices[0] + dices[1]);
+        map_update_counter = (map_update_counter + 1) % 30;
+
+        draw_vertices(display, font, selected, PlayerColors[current_player]);
     }
+
+    // ui
+    draw_turn_info(display, font);
+
+    //if (turn_nr <= MAX_PLAYERS) {
+    //    float margin = 16.f;
+    //    char text[] = "* placement choosing phase *";
+    //    al_draw_filled_rectangle(0, 0, margin + al_get_text_width(font, text), margin + al_get_font_line_height(font), ResourceColor[WATER]);
+    //    al_draw_text(font, al_map_rgb(255, 0, 0), margin, margin, 0, text);
+    //}
+    //else {
+        draw_bank_cards(display, font);
+        draw_player_cards(display, font);
+    //}
 
     al_flip_display();
 }
@@ -91,39 +115,10 @@ void next_turn() {
     current_player = (current_player + 1) % MAX_PLAYERS;
     dices[0] = rand() % 6 + 1;
     dices[1] = rand() % 6 + 1;
+    map_update_counter = 0;
 }
 
 // DRAWING
-void draw_bank_cards(ALLEGRO_DISPLAY* display, ALLEGRO_FONT* font)
-{
-    // TODO: change the look of this panel
-    ALLEGRO_COLOR black = al_map_rgb(0, 0, 0);
-    ALLEGRO_COLOR white = al_map_rgb(255, 255, 255);
-    float padding = 16.f;
-    float margin = 8.f;
-    float line_height = al_get_font_line_height(font);
-    float max_width = al_get_text_width(font, "BANK CARDS:");
-    al_draw_filled_rounded_rectangle(margin, margin,
-                                     margin + max_width + 2 * padding, (line_height + margin) * (RESOURCES_COUNT + 1) + padding * 3,
-                                     padding, padding, white);
-    float x = padding + margin;
-    float y = padding + margin;
-    al_draw_text(font, black, x, y, 0, "BANK CARDS:");
-    y += padding + line_height;
-    x += margin;
-    for (int i = 0; i < RESOURCES_COUNT; ++i) {
-        char name[32];
-        char count[4];
-        //sprintf_s(&text, 32, "%s: %d", RESOURCES_NAMES[i], bank_cards[i]);
-        _itoa_s(bank_cards[i], count, 4, 10);
-        sprintf_s(&name, 32, "%s:", RESOURCES_NAMES[i]);
-        al_draw_filled_rounded_rectangle(margin + padding, y, max_width + margin + padding, y + line_height, margin, margin, ResourceColor[i + 2]);
-        al_draw_text(font, white, x, y, 0, name);
-        al_draw_text(font, white, x + max_width - 2 * margin - al_get_text_width(font, count), y, 0, count);
-        y += margin + line_height;
-    }
-}
-
 void draw_dice(ALLEGRO_DISPLAY* display, ALLEGRO_FONT* font, float x, float y, int size, int number) {
     ALLEGRO_COLOR black = al_map_rgb(0, 0, 0);
     ALLEGRO_COLOR white = al_map_rgb(255, 255, 255);
@@ -170,25 +165,128 @@ void draw_turn_info(ALLEGRO_DISPLAY* display, ALLEGRO_FONT* font) {
     int size = MAP_CELL_SIZE / 2;
     float margin = 16.f;
     float line_height = al_get_font_line_height(font) / 2;
-    ALLEGRO_COLOR white = al_map_rgb(255, 255, 255);
+    //ALLEGRO_COLOR text_color = al_map_rgb(0, 0, 0);
+    ALLEGRO_COLOR text_color = al_map_rgb(255, 255, 255);
 
     // clear space
-    al_draw_filled_rectangle(w - 3 * size - 3 * margin, 0, w, 2 * size + 4 * margin + 2 * line_height, ResourceColor[WATER]);
+    al_draw_filled_rectangle(w - 3.5 * size - 3 * margin, 0, w, size + (MAX_PLAYERS + 2) * margin + (MAX_PLAYERS + 2) * line_height, ResourceColor[WATER]);
 
     // draw dices
     draw_dice(display, font, w - margin - size, margin, size, dices[0]);
     draw_dice(display, font, w - 2 * (margin + size), margin, size, dices[1]);
 
     // draw text data
+    float x = w - margin;
+    float y = 1.5 * margin + size;
     char turn_text[32];
     sprintf_s(&turn_text, 32, "turn: %3d", turn_nr);
-    char player_text[32];
-    sprintf_s(&player_text, 32, "player: %3s", " ");
-    al_draw_text(font, white, w - margin - al_get_text_width(font, turn_text), 1.5 * margin + size, 0, turn_text);
-    float cr = line_height;
-    al_draw_filled_circle(w - margin - cr, 2.5 * margin + size + line_height * 2, line_height, playerColors[current_player]);
-    al_draw_text(font, white, w - margin - al_get_text_width(font, player_text), 2.5 * margin + size + line_height, 0, player_text);
-    char cp_text[4];
-    _itoa_s(current_player + 1, cp_text, 4, 10);
-    al_draw_text(font, white, w - margin - al_get_text_width(font, cp_text) - cr * 0.5, 2.5 * margin + size + line_height, 0, cp_text);
+    al_draw_text(font, text_color, x - al_get_text_width(font, turn_text), y, 0, turn_text);
+    y += margin + line_height;
+    // player data
+    for (int p = 0; p < MAX_PLAYERS; ++p) {
+        float cr = line_height;
+        al_draw_filled_circle(x - al_get_text_width(font, " player #X: XXX") - cr * 0.5, y + cr, cr, PlayerColors[p]);
+        char player_text[32];
+        sprintf_s(&player_text, 32, "%splayer #%d: %3d", current_player == p ? "* " : "", p + 1, player_points[p]);
+        if (p == current_player) al_draw_filled_rounded_rectangle(x - al_get_text_width(font, player_text) - cr * 0.5, y, w + cr, y + line_height * 2, cr, cr, PlayerColors[current_player]);
+        al_draw_text(font, current_player == p ? text_color : PlayerColors[p], x - al_get_text_width(font, player_text), y, 0, player_text);
+        //char cp_text[4];
+        //_itoa_s(current_player + 1, cp_text, 4, 10);
+        //al_draw_text(font, white, w - margin - al_get_text_width(font, cp_text) - cr * 0.5, 2.5 * margin + size + line_height, 0, cp_text);
+        y += margin + line_height;
+    }
+}
+
+void draw_bank_cards(ALLEGRO_DISPLAY* display, ALLEGRO_FONT* font)
+{
+    // TODO: change the look of this panel
+    ALLEGRO_COLOR black = al_map_rgb(0, 0, 0);
+    ALLEGRO_COLOR white = al_map_rgb(255, 255, 255);
+    float padding = 8.f;
+    float margin = 8.f;
+    float line_height = al_get_font_line_height(font);
+    float y_shift = 0;
+    float max_width = al_get_text_width(font, "bricks: XX");
+    //al_draw_filled_rounded_rectangle(margin, y_shift + margin,
+    //    margin + max_width + 2 * padding, y_shift + (line_height + margin) * (RESOURCES_COUNT + 1) + padding * 3,
+    //    padding, padding, white);
+    float x = padding + margin;
+    float y = padding + margin + y_shift;
+    float cr = line_height / 2;
+    al_draw_filled_rounded_rectangle(-cr, y, margin + al_get_text_width(font, "bank cards:  "), y + line_height, cr, cr, black);
+    al_draw_text(font, white, x, y, 0, "bank cards:  ");
+    y += margin + padding + line_height;
+    x += margin;
+    for (int i = 0; i < RESOURCES_COUNT; ++i) {
+        char name[32];
+        char count[4];
+        //sprintf_s(&text, 32, "%s: %d", RESOURCES_NAMES[i], bank_cards[i]);
+        _itoa_s(player_cards[current_player][i], count, 4, 10);
+        sprintf_s(&name, 32, "%s:", RESOURCES_NAMES[i]);
+        al_draw_filled_rounded_rectangle(margin + padding, y, max_width + 3 * margin + padding, y + line_height, margin, margin, ResourceColor[i + 2]);
+        al_draw_text(font, black, x, y, 0, name);
+        al_draw_text(font, black, x + max_width - al_get_text_width(font, count), y, 0, count);
+        y += margin + line_height;
+    }
+    //// TODO: change the look of this panel
+    //ALLEGRO_COLOR black = al_map_rgb(0, 0, 0);
+    //ALLEGRO_COLOR white = al_map_rgb(255, 255, 255);
+    ////float padding = 16.f;
+    //float padding = 8.f;
+    //float margin = 8.f;
+    //float line_height = al_get_font_line_height(font);
+    //float max_width = al_get_text_width(font, "bricks: XX");
+    //al_draw_filled_rectangle(0, 0, margin + max_width + 2 * padding, (line_height + margin) * (RESOURCES_COUNT + 1) + padding * 3, ResourceColor[WATER]);
+    ////al_draw_filled_rounded_rectangle(margin, margin,
+    ////    margin + max_width + 2 * padding, (line_height + margin) * (RESOURCES_COUNT + 1) + padding * 3,
+    ////    padding, padding, white);
+    //float x = padding + margin;
+    //float y = padding + margin;
+    //al_draw_text(font, black, x, y, 0, "bank cards:");
+    //y += padding + line_height;
+    //x += margin;
+    //for (int i = 0; i < RESOURCES_COUNT; ++i) {
+    //    char name[32];
+    //    char count[4];
+    //    //sprintf_s(&text, 32, "%s: %d", RESOURCES_NAMES[i], bank_cards[i]);
+    //    _itoa_s(bank_cards[i], count, 4, 10);
+    //    sprintf_s(&name, 32, "%s:", RESOURCES_NAMES[i]);
+    //    al_draw_filled_rounded_rectangle(margin + padding, y, max_width +  3 * margin + padding, y + line_height, margin, margin, ResourceColor[i + 2]);
+    //    al_draw_text(font, black, x, y, 0, name);
+    //    al_draw_text(font, black, x + max_width - al_get_text_width(font, count), y, 0, count);
+    //    y += margin + line_height;
+    //}
+}
+
+void draw_player_cards(ALLEGRO_DISPLAY* display, ALLEGRO_FONT* font)
+{
+    // TODO: change the look of this panel
+    ALLEGRO_COLOR black = al_map_rgb(0, 0, 0);
+    ALLEGRO_COLOR white = al_map_rgb(255, 255, 255);
+    float padding = 8.f;
+    float margin = 8.f;
+    float line_height = al_get_font_line_height(font);
+    float y_shift = (line_height + margin) * (RESOURCES_COUNT + 1) + padding * 2;
+    float max_width = al_get_text_width(font, "bricks: XX");
+    //al_draw_filled_rounded_rectangle(margin, y_shift + margin,
+    //    margin + max_width + 2 * padding, y_shift + (line_height + margin) * (RESOURCES_COUNT + 1) + padding * 3,
+    //    padding, padding, white);
+    float x = padding + margin;
+    float y = padding + margin + y_shift;
+    float cr = line_height / 2;
+    al_draw_filled_rounded_rectangle(-cr, y, margin + al_get_text_width(font, "player cards:  "), y + line_height, cr, cr, PlayerColors[current_player]);
+    al_draw_text(font, white, x, y, 0, "player cards:  ");
+    y += margin + padding + line_height;
+    x += margin;
+    for (int i = 0; i < RESOURCES_COUNT; ++i) {
+        char name[32];
+        char count[4];
+        //sprintf_s(&text, 32, "%s: %d", RESOURCES_NAMES[i], bank_cards[i]);
+        _itoa_s(player_cards[current_player][i], count, 4, 10);
+        sprintf_s(&name, 32, "%s:", RESOURCES_NAMES[i]);
+        al_draw_filled_rounded_rectangle(margin + padding, y, max_width + 3 * margin + padding, y + line_height, margin, margin, ResourceColor[i + 2]);
+        al_draw_text(font, black, x, y, 0, name);
+        al_draw_text(font, black, x + max_width - al_get_text_width(font, count), y, 0, count);
+        y += margin + line_height;
+    }
 }
