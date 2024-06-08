@@ -38,6 +38,7 @@ keycode | field type
 
   - **[CATAN](https://en.wikipedia.org/wiki/Catan)** — original board game developed by Klaus Teuber
   - **[COLONIST.IO](https://colonist.io/)** — digital counterpart
+  - **[FIRACODE](https://github.com/tonsky/FiraCode)** — font used in the project
 
 ### <!-- Footer -->
 **Poznan University of Technology 🎓** \

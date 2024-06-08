@@ -1,5 +1,9 @@
 ﻿#include "map.h"
 
+// resources
+const int RESOURCES_COUNT = 5;
+const char RESOURCES_NAMES[5][10] = {"WOOD", "BRICKS", "WHEAT", "ORE", "SHEEP"};
+
 // 🎨 design definitions
 ALLEGRO_COLOR ResourceColor[7];
 
@@ -486,10 +490,10 @@ void draw_hex(HEX hex, ALLEGRO_FONT* font)
 
 	// draw hex dice value
 	if (hex.type != DESERT) {
-		char str[4];
-		_itoa_s(hex.value, str, 4, 10);
+		char value[4];
+		_itoa_s(hex.value, value, 4, 10);
 		al_draw_filled_rounded_rectangle(x + MAP_CELL_SIZE / 4, y + MAP_CELL_SIZE / 2 - MAP_CELL_SIZE / 8, x + MAP_CELL_SIZE * 3/4, y + MAP_CELL_SIZE / 2 + MAP_CELL_SIZE / 8, 8, 8, al_map_rgb(255, 255, 255));
-		al_draw_text(font, al_map_rgb(0, 0, 0), x + MAP_CELL_SIZE / 2, y + MAP_CELL_SIZE / 2 - MAP_CELL_SIZE / 7, ALLEGRO_ALIGN_CENTER, str);
+		al_draw_text(font, al_map_rgb(0, 0, 0), x + MAP_CELL_SIZE / 2, y + MAP_CELL_SIZE / 2 - al_get_font_line_height(font) / 2, ALLEGRO_ALIGN_CENTER, value);
 	}
 
 	// draw road (outline)

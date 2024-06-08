@@ -26,6 +26,9 @@ typedef enum { WATER, DESERT, WOOD, BRICK, WHEAT, ORE, SHEEP } ResourceType;
 typedef enum { NONE, SETTLEMENT, CITY } PlacementType;
 typedef enum { NOONE, P1, P2, P3, P4 } Player;
 
+extern const int RESOURCES_COUNT;
+extern const char RESOURCES_NAMES[5][10];
+
 // 🎨 design definitions
 extern ALLEGRO_COLOR ResourceColor[7];
 

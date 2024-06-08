@@ -9,7 +9,6 @@
 
 // modules
 #include "src/game.h"
-#include "src/map.h"
 
 int main()
 {
@@ -37,24 +36,24 @@ int main()
     al_install_keyboard();
     al_install_mouse();
 
+    // turn on blending for alpha colors
+    //al_set_blender(ALLEGRO_ADD, ALLEGRO_ALPHA, ALLEGRO_INVERSE_ALPHA);
+
     // register event sources
     al_register_event_source(queue, al_get_keyboard_event_source());
     al_register_event_source(queue, al_get_mouse_event_source());
     al_register_event_source(queue, al_get_timer_event_source(timer));
     al_register_event_source(queue, al_get_display_event_source(display));
 
-    // init game modules
-    if (!init_map(display)) return 0;
-
     // load resources
-    font = al_load_ttf_font("resources/arial.ttf", 32, 0);
+    font = al_load_ttf_font("resources/firacode.ttf", 24, 0);
 
-    // PRELOOP
-    draw_map(display, font, selected);
-
-    // * MAIN GAME LOOP
+    // init game modules
     al_start_timer(timer);
     srand(time(NULL));
+    if (!init_game(display, font)) return 0;
+
+    // * MAIN GAME LOOP
     bool running = true;
     while (running) {
         // handle events
