@@ -42,8 +42,31 @@
     <ClInclude Include="src\ui.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="resource.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Font Include="resources\arial.ttf" />
+    <Font Include="resources\firacode.ttf" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="GV.rc">
+      <Filter>Resource Files</Filter>
+    </ResourceCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="icon1.ico">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="resources\logo.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="resources\logo.ico">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="resources\icon.ico">
+      <Filter>Resource Files</Filter>
+    </Image>
   </ItemGroup>
 </Project>

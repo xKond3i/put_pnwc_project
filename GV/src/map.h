@@ -65,6 +65,8 @@ void free_map();
 bool init_map(ALLEGRO_DISPLAY* display);
 bool load_map_from_file(char* fname, bool extra_debug);
 void generate_map(ALLEGRO_DISPLAY* display);
+
+// drawing
 void draw_hex(HEX hex, ALLEGRO_FONT* font);
 void draw_map(ALLEGRO_DISPLAY* display, ALLEGRO_FONT* font);
 void draw_vertices(ALLEGRO_DISPLAY* display, ALLEGRO_FONT* font, int selected);

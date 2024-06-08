@@ -1,5 +1,7 @@
 # GROW A VILLAGE
 
+![Logo](logo_mini.png)
+
 **"GROW A VILLAGE"** [version IN-DEV]\
 Simple digital clone of a "[CATAN](https://en.wikipedia.org/wiki/Catan)" board game or a digital counterpart "[colonist.io](https://colonist.io/)" with a few twists. \
 The rules are simple: roll the dice

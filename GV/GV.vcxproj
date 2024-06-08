@@ -169,12 +169,23 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="resource.h" />
     <ClInclude Include="src\game.h" />
     <ClInclude Include="src\map.h" />
     <ClInclude Include="src\ui.h" />
   </ItemGroup>
   <ItemGroup>
     <Font Include="resources\arial.ttf" />
+    <Font Include="resources\firacode.ttf" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="GV.rc" />
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="icon1.ico" />
+    <Image Include="resources\icon.ico" />
+    <Image Include="resources\logo.ico" />
+    <Image Include="resources\logo.png" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
