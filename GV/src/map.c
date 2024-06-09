@@ -381,7 +381,7 @@ void generate_map(ALLEGRO_DISPLAY* display) {
 			if (board.tiles[parents[i]].type != WATER) { is_active = true; break; }
 		}
 
-		board.placements[pos] = (PLACEMENT){ grid_vertices[pos].x, grid_vertices[pos].y, 0, NONE };
+		board.placements[pos] = (PLACEMENT){ grid_vertices[pos].x, grid_vertices[pos].y, NOONE, NONE };
 		board.placements[pos].active = is_active;
 		//board.placements[pos].neighbors = neighbors;
 		// array passing seems to not work...
@@ -532,20 +532,46 @@ void draw_map(ALLEGRO_DISPLAY* display, ALLEGRO_FONT* font, int dices)
 	#endif
 }
 
-void draw_vertices(ALLEGRO_DISPLAY* display, ALLEGRO_FONT* font, int selected, ALLEGRO_COLOR player_color) {
+void draw_vertices(ALLEGRO_DISPLAY* display, ALLEGRO_FONT* font, int selected, int current_player, ALLEGRO_COLOR* PlayerColors) {
 	// [DEBUG] SHOW ALL VERTICES
 	for (int i = 0; i < MAX_VERTICES; ++i) {
 		PLACEMENT v = board.placements[i];
 		if (v.active == false) continue;
-		ALLEGRO_COLOR color = player_color;
+		ALLEGRO_COLOR color = PlayerColors[current_player];
 		if (selected != -1) {
 			if (i == selected) color = al_map_rgb(255, 255, 255);
 			else if (i == board.placements[selected].neighbors[0] || i == board.placements[selected].neighbors[1] || i == board.placements[selected].neighbors[2]) {
-				color = al_map_rgb((255 + player_color.r * 255) * 0.5, (255 + player_color.g * 255) * 0.5, (255 + player_color.b * 255) * 0.5);
+				color = al_map_rgb((255 + color.r * 255) * 0.5, (255 + color.g * 255) * 0.5, (255 + color.b * 255) * 0.5);
 			}
 		}
 		al_draw_filled_circle(v.x + grid_offset.x, v.y + grid_offset.y, 8, color);
+		draw_house(display, v, PlayerColors);
 	}
+}
+
+void draw_house(ALLEGRO_DISPLAY* display, PLACEMENT place, ALLEGRO_COLOR* PlayerColors) {
+	if (place.building == NONE) return;
+
+	float size = 24;
+	if (place.building == TENT) {
+		al_draw_filled_triangle(place.x + grid_offset.x - size * 0.5, place.y + grid_offset.y + size * 0.5,
+			place.x + grid_offset.x, place.y + grid_offset.y - size,
+			place.x + grid_offset.x + size * 0.5, place.y + grid_offset.y + size * 0.5, PlayerColors[place.player]);
+	}
+	else if (place.building == HOUSE) {
+		al_draw_filled_rectangle(place.x + grid_offset.x - size * 0.5, place.y + grid_offset.y - size * 0,
+			place.x + grid_offset.x + size * 0.5, place.y + grid_offset.y + size * 0.5, PlayerColors[place.player]);
+		al_draw_filled_triangle(place.x + grid_offset.x - size * 0.75, place.y + grid_offset.y - size * 0,
+			place.x + grid_offset.x, place.y + grid_offset.y - size,
+			place.x + grid_offset.x + size * 0.75, place.y + grid_offset.y - size * 0, PlayerColors[place.player]);
+	}
+	//if (place.building >= BIG_HOUSE) {
+	//	al_draw_filled_rectangle(place.x + grid_offset.x - size * 1, place.y + grid_offset.y + size * 0.25,
+	//							 place.x + grid_offset.x + size * 1, place.y + grid_offset.y + size * 0.5, PlayerColors[place.player]);
+	//	al_draw_filled_triangle(place.x + grid_offset.x - size * 1.25, place.y + grid_offset.y + size * 0.25,
+	//							place.x + grid_offset.x, place.y + grid_offset.y - size * 0.5,
+	//							place.x + grid_offset.x + size * 1.25, place.y + grid_offset.y + size * 0.25, PlayerColors[place.player]);
+	//}
 }
 
 #ifdef _DEBUG_SHOW_GRIDS

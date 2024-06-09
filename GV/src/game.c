@@ -2,20 +2,27 @@
 
 int selected = -1;
 
+// bank info
 const int MAX_TYPE_CARDS = 19;
 int bank_cards[5];
 
+// player info
 ALLEGRO_COLOR PlayerColors[4];
 const int MAX_PLAYERS = 4;
 int player_cards[4][5];
 int player_points[4];
+
+// turn info
 int current_player;
 int turn_nr;
 int dices[2];
 
+// winning conditions
+int goal = 10;
+
 bool init_game(ALLEGRO_DISPLAY* display, ALLEGRO_FONT* font)
 {
-    if (!init_map(display)) return 0;
+    if (!init_map(display)) return false;
 
     PlayerColors[0] = al_map_rgb(196, 0, 0);
     PlayerColors[1] = al_map_rgb(0, 0, 196);
@@ -23,6 +30,8 @@ bool init_game(ALLEGRO_DISPLAY* display, ALLEGRO_FONT* font)
     PlayerColors[3] = al_map_rgb(128, 0, 196);
 
     restart_game(display, font);
+
+    return true;
 }
 
 void clear_game_mem() {
@@ -50,29 +59,31 @@ void restart_game(ALLEGRO_DISPLAY* display, ALLEGRO_FONT* font)
 }
 
 // LOGIC
-void update_loop(ALLEGRO_EVENT* event, ALLEGRO_DISPLAY* display, ALLEGRO_FONT* font)
+void update_loop(ALLEGRO_EVENT* event, ALLEGRO_DISPLAY* display, ALLEGRO_FONT* font, ALLEGRO_BITMAP* trophy)
 {
     // update loop (when timer ticks)
     if (event->type == ALLEGRO_EVENT_TIMER) {
         if (map_update_counter == 0) draw_map(display, font, turn_nr <= MAX_PLAYERS ? -1 : dices[0] + dices[1]);
         map_update_counter = (map_update_counter + 1) % 30;
 
-        draw_vertices(display, font, selected, PlayerColors[current_player]);
+        draw_vertices(display, font, selected, current_player, PlayerColors);
     }
 
     // ui
-    draw_turn_info(display, font);
+    draw_turn_info(display, font, trophy);
 
-    //if (turn_nr <= MAX_PLAYERS) {
-    //    float margin = 16.f;
-    //    char text[] = "* placement choosing phase *";
-    //    al_draw_filled_rectangle(0, 0, margin + al_get_text_width(font, text), margin + al_get_font_line_height(font), ResourceColor[WATER]);
-    //    al_draw_text(font, al_map_rgb(255, 0, 0), margin, margin, 0, text);
-    //}
-    //else {
-        draw_bank_cards(display, font);
-        draw_player_cards(display, font);
-    //}
+    draw_bank_cards(display, font);
+    draw_player_cards(display, font);
+
+    if (turn_nr <= 2 * MAX_PLAYERS) {
+        float margin = 16.f;
+        float w = al_get_display_width(display);
+        float h = al_get_display_height(display);
+        float lh = al_get_font_line_height(font);
+        char text[] = "* placement choosing phase *";
+        al_draw_filled_rectangle(0, h - margin - lh, margin + al_get_text_width(font, text), h, ResourceColor[WATER]);
+        al_draw_text(font, al_map_rgb(255, 0, 0), margin, h - margin - lh, 0, text);
+    }
 
     al_flip_display();
 }
@@ -106,7 +117,32 @@ void handle_events(ALLEGRO_EVENT* event, bool* running)
         float d = sqrt((v.x - norm_mx) * (v.x - norm_mx) + (v.y - norm_my) * (v.y - norm_my));
         if (d > MAP_CELL_SIZE * 0.1) { selected = -1; return; }
         
-        selected = idx;
+        if (board.placements[idx].player == NOONE || board.placements[idx].player == current_player) {
+            selected = idx;
+        }
+    }
+    else if (event->type == ALLEGRO_EVENT_MOUSE_BUTTON_DOWN) {
+        if (event->mouse.button == 1) {
+            if (board.placements[selected].player == NOONE) {
+                // first turns - free stuff
+                bool first_turns = turn_nr <= (2 * MAX_PLAYERS);
+                // check if player has resources for a house
+                bool has_resources = true;
+                if (player_cards[current_player][WOOD] < 1 || player_cards[current_player][BRICK] < 1 || player_cards[current_player][WHEAT] < 1 || player_cards[current_player][SHEEP] < 1) has_resources = false;
+                PLACEMENT v = board.placements[selected];
+                // check if neighbors are free
+                bool neighbors_free = true;
+                for (int i = 0; i < 3; ++i) {
+                    if (board.placements[v.neighbors[i]].player != NOONE) neighbors_free = false;
+                }
+                if (neighbors_free && (has_resources || first_turns)) {
+                    board.placements[selected].building = TENT;
+                    board.placements[selected].player = current_player;
+                    player_points[current_player]++;
+                    next_turn();
+                }
+            }
+        }
     }
 }
 
@@ -122,6 +158,7 @@ void next_turn() {
         dices[1] = rand() % 6 + 1;
     }
     map_update_counter = 0;
+    selected = -1;
 }
 
 // DRAWING
@@ -166,7 +203,7 @@ void draw_dice(ALLEGRO_DISPLAY* display, ALLEGRO_FONT* font, float x, float y, i
     }
 }
 
-void draw_turn_info(ALLEGRO_DISPLAY* display, ALLEGRO_FONT* font) {
+void draw_turn_info(ALLEGRO_DISPLAY* display, ALLEGRO_FONT* font, ALLEGRO_BITMAP* trophy) {
     int w = al_get_display_width(display);
     int size = MAP_CELL_SIZE / 2;
     float margin = 16.f;
@@ -175,7 +212,7 @@ void draw_turn_info(ALLEGRO_DISPLAY* display, ALLEGRO_FONT* font) {
     ALLEGRO_COLOR text_color = al_map_rgb(255, 255, 255);
 
     // clear space
-    al_draw_filled_rectangle(w - 3.5 * size - 3 * margin, 0, w, size + (MAX_PLAYERS + 2) * margin + (MAX_PLAYERS + 2) * line_height, ResourceColor[WATER]);
+    al_draw_filled_rectangle(w - 3.5 * size - 3 * margin, 0, w, size + (MAX_PLAYERS + 2) * margin + (MAX_PLAYERS + 4) * line_height, ResourceColor[WATER]);
 
     // draw dices
     draw_dice(display, font, w - margin - size, margin, size, dices[0]);
@@ -202,6 +239,15 @@ void draw_turn_info(ALLEGRO_DISPLAY* display, ALLEGRO_FONT* font) {
         //al_draw_text(font, white, w - margin - al_get_text_width(font, cp_text) - cr * 0.5, 2.5 * margin + size + line_height, 0, cp_text);
         y += margin + line_height;
     }
+    char goal_text[32];
+    sprintf_s(&goal_text, 32, "goal: %3d", goal);
+    al_draw_text(font, text_color, x - al_get_text_width(font, goal_text), y, 0, goal_text);
+    float og_w = al_get_bitmap_width(trophy);
+    float og_h = al_get_bitmap_height(trophy);
+    al_draw_scaled_bitmap(trophy,
+        0, 0, og_w, og_h,
+        x - al_get_text_width(font, goal_text) - line_height * 2 - margin * 0.5, y, line_height * 2, line_height * 2,
+        0);
 }
 
 void draw_cards(ALLEGRO_DISPLAY* display, ALLEGRO_FONT* font, int shift, const int* cards, char* title, ALLEGRO_COLOR color) {

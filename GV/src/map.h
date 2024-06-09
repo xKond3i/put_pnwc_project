@@ -23,8 +23,8 @@
 
 // resources enumerations
 typedef enum { WATER, DESERT, WOOD, BRICK, WHEAT, ORE, SHEEP } ResourceType;
-typedef enum { NONE, SETTLEMENT, CITY } PlacementType;
-typedef enum { NOONE, P1, P2, P3, P4 } Player;
+typedef enum { NONE, TENT, HOUSE } PlacementType;
+typedef enum { NOONE = -1, P1, P2, P3, P4 } Player;
 
 extern const int RESOURCES_COUNT;
 extern const char RESOURCES_NAMES[5][10];
@@ -36,6 +36,7 @@ extern ALLEGRO_COLOR ResourceColor[7];
 typedef struct { float x; float y; } POINT;
 typedef struct { float x; float y; ResourceType type; int value; } HEX;
 typedef struct { float x; float y; int player; PlacementType building; int neighbors[3]; int parents[3]; bool active; } PLACEMENT;
+//typedef struct { POINT start; POINT end; float x; float y; Player player; } ROADS;
 typedef struct { POINT start; POINT end; Player player; } ROADS;
 typedef struct { HEX* tiles; PLACEMENT* placements; ROADS* roads; } BOARD;
 
@@ -69,7 +70,9 @@ void generate_map(ALLEGRO_DISPLAY* display);
 // drawing
 void draw_hex(HEX hex, ALLEGRO_FONT* font, bool overlay);
 void draw_map(ALLEGRO_DISPLAY* display, ALLEGRO_FONT* font, int dices);
-void draw_vertices(ALLEGRO_DISPLAY* display, ALLEGRO_FONT* font, int selected, ALLEGRO_COLOR player_color);
+void draw_vertices(ALLEGRO_DISPLAY* display, ALLEGRO_FONT* font, int selected, int current_player, ALLEGRO_COLOR* PlayerColors);
+
+void draw_house(ALLEGRO_DISPLAY* display, PLACEMENT place, ALLEGRO_COLOR* PlayerColors);
 
 // DEBUG functionalities
 #ifdef _DEBUG_SHOW_GRIDS

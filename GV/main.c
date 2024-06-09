@@ -17,6 +17,7 @@ ALLEGRO_EVENT_QUEUE* queue;
 ALLEGRO_TIMER* timer;
 ALLEGRO_FONT* font;
 ALLEGRO_BITMAP* icon;
+ALLEGRO_BITMAP* trophy;
 
 void clear_mem() {
     // clear pointers to free memory
@@ -25,6 +26,7 @@ void clear_mem() {
     al_uninstall_keyboard();
     al_destroy_font(font);
     al_destroy_bitmap(icon);
+    al_destroy_bitmap(trophy);
     al_destroy_timer(timer);
     al_destroy_event_queue(queue);
     al_destroy_display(display);
@@ -66,10 +68,13 @@ int main()
     al_register_event_source(queue, al_get_display_event_source(display));
 
     // load resources
+    // TODO: (resources.h + resources.c) add structure, that contains, all the resources and loads them
     font = al_load_ttf_font("resources/firacode.ttf", 24, 0);
     if (!font) { clear_mem(); return 0; }
     icon = al_load_bitmap("resources/logo.png");
     if (!icon) { clear_mem(); return 0; }
+    trophy = al_load_bitmap("resources/trophy.png");
+    if (!trophy) { clear_mem(); return 0; }
 
     al_set_display_icon(display, icon);
 
@@ -85,7 +90,7 @@ int main()
         ALLEGRO_EVENT event;
         al_wait_for_event(queue, &event);
         handle_events(&event, &running);
-        update_loop(&event, display, font);
+        update_loop(&event, display, font, trophy);
     }
 
     clear_mem();
