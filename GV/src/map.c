@@ -16,6 +16,7 @@ int MAP_CELL_SIZE = 128; // DEFAULT 128
 int MAP_ROAD_THICKNESS = 8; // DEFAULT 8
 
 // grid config
+int MAX_EDGES;
 int MAX_VERTICES;
 int MAX_TILES;
 POINT grid_offset;
@@ -79,8 +80,9 @@ bool load_map_from_file(char* fname) {
 					MAP_ROWS = num;
 				else if (token_id == 1) {
 					MAP_COLS = num;
-					MAX_TILES = MAP_COLS * MAP_ROWS - (MAP_ROWS / 2) + 1; // ! remember that every second row has 1 tile less (add 1 to be safe)
-					MAX_VERTICES = (MAP_COLS * 2 + 1) * (MAP_ROWS + 1);	  // ! for every bounding top line + bottom last = MAP_COLS * 2 + 1 vertices
+					MAX_TILES = MAP_COLS * MAP_ROWS - floor(MAP_ROWS / 2.); // ! remember that every second row has 1 tile less
+					MAX_VERTICES = (MAP_COLS * 2 + 1) * (MAP_ROWS + 1);	   // ! for every bounding top line + bottom last = MAP_COLS * 2 + 1 vertices
+					MAX_EDGES = (MAP_COLS * 5 + 1) * ceil(MAP_ROWS / 2.) + MAP_COLS * floor(MAP_ROWS / 2.);
 					terrain = (char*)malloc(MAX_TILES * sizeof(char));
 				}
 			}
@@ -120,6 +122,8 @@ bool load_map_from_file(char* fname) {
 		}
 
 		#ifdef _DEBUG_FILE_EXTRA_OUT
+			if (id == 0) printf("MAX_TILES: %d\nMAX_VERTICES: %d\nMAX_EDGES: %d\n", MAX_TILES, MAX_VERTICES, MAX_EDGES);
+			
 			printf("\n");
 		#endif
 		++id;
@@ -423,6 +427,9 @@ void generate_map(ALLEGRO_DISPLAY* display) {
 		}
 	}
 
+	// generate submain frid (of edges)
+	// TODO
+
 	#ifdef _DEBUG_GRID_EXTRA_OUT
 		printf("\n\033[33m[MAP] finished.\033[0m\n\n");
 	#endif
@@ -515,7 +522,7 @@ void draw_map(ALLEGRO_DISPLAY* display, ALLEGRO_FONT* font, int dices)
 	al_clear_to_color(ResourceColor[WATER]);
 
 	// draw tiles
-	for (int pos = 0; pos < MAX_TILES - 1; ++pos) {
+	for (int pos = 0; pos < MAX_TILES; ++pos) {
 		draw_hex(board.tiles[pos], font, dices == board.tiles[pos].value);
 		// [DEBIG] SHOW TILE INDEXES
 		//#ifdef _DEBUG_SHOW_GRIDS)

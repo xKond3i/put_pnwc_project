@@ -78,6 +78,7 @@ void update_loop(ALLEGRO_EVENT* event, ALLEGRO_DISPLAY* display, ALLEGRO_FONT* f
 
     draw_bank_cards(display, font, bank_cards);
     draw_player_cards(display, font, player_cards[current_player], PlayerColors[current_player]);
+    draw_other_players_cards(display, font, current_player, MAX_PLAYERS, player_cards, PlayerColors);
 
     if (turn_nr <= 2 * MAX_PLAYERS) {
         float margin = 16.f;
@@ -116,8 +117,11 @@ void handle_events(ALLEGRO_EVENT* event, bool* running)
         int col = floor((norm_mx + MAP_CELL_SIZE * 0.25) / (MAP_CELL_SIZE * 0.5));
         int idx = row * (MAP_COLS * 2 + 1) + col;
         
+        if (idx < 0 || MAX_VERTICES <= idx) return;
+
         PLACEMENT v = board.placements[idx];
         if (v.active == false) return;
+
         float dx = (v.x - norm_mx);
         float dy = (v.y - norm_my);
         float d = sqrtf(dx * dx + dy * dy);
@@ -151,6 +155,13 @@ void handle_events(ALLEGRO_EVENT* event, bool* running)
                         board.placements[selected].building = TENT;
                         board.placements[selected].player = current_player;
                         player_points[current_player]++;
+                        // pay for building the house
+                        if (has_resources && !first_turns) {
+                            cpc[WOOD] -= 1;
+                            cpc[BRICK] -= 1;
+                            cpc[WHEAT] -= 1;
+                            cpc[SHEEP] -= 1;
+                        }
                         next_turn();
                     }
                     else {

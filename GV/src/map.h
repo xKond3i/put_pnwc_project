@@ -36,8 +36,7 @@ extern ALLEGRO_COLOR ResourceColor[7];
 typedef struct { float x; float y; } POINT;
 typedef struct { float x; float y; ResourceType type; int value; } HEX;
 typedef struct { float x; float y; int player; PlacementType building; int neighbors[3]; int parents[3]; bool active; } PLACEMENT;
-//typedef struct { POINT start; POINT end; float x; float y; Player player; } ROADS;
-typedef struct { POINT start; POINT end; Player player; } ROADS;
+typedef struct { POINT start; POINT end; float x; float y; Player player; bool active; } ROADS;
 typedef struct { HEX* tiles; PLACEMENT* placements; ROADS* roads; } BOARD;
 
 // map config
@@ -49,6 +48,7 @@ extern int MAP_CELL_SIZE;
 extern int MAP_ROAD_THICKNESS;
 
 // grid config
+extern int MAX_EDGES;
 extern int MAX_VERTICES;
 extern int MAX_TILES;
 extern POINT grid_offset;
@@ -64,7 +64,7 @@ extern BOARD board;
 // functionalities
 void free_map();
 bool init_map(ALLEGRO_DISPLAY* display);
-bool load_map_from_file(char* fname, bool extra_debug);
+bool load_map_from_file(char* fname);
 void generate_map(ALLEGRO_DISPLAY* display);
 
 // drawing

@@ -16,3 +16,4 @@ void draw_turn_info(ALLEGRO_DISPLAY* display, ALLEGRO_FONT* font, ALLEGRO_BITMAP
 void draw_cards(ALLEGRO_DISPLAY* display, ALLEGRO_FONT* font, int shift, const int* cards, char* title, ALLEGRO_COLOR color);
 void draw_bank_cards(ALLEGRO_DISPLAY* display, ALLEGRO_FONT* font, int* bank_cards);
 void draw_player_cards(ALLEGRO_DISPLAY* display, ALLEGRO_FONT* font, int* player_cards, ALLEGRO_COLOR player_color);
+void draw_other_players_cards(ALLEGRO_DISPLAY* display, ALLEGRO_FONT* font, int current_player, const int MAX_PLAYERS, const int cards[4][5], ALLEGRO_COLOR* PlayerColors);

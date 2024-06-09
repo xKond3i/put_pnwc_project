@@ -66,10 +66,10 @@ void draw_turn_info(ALLEGRO_DISPLAY* display, ALLEGRO_FONT* font, ALLEGRO_BITMAP
     // player data
     for (int p = 0; p < MAX_PLAYERS; ++p) {
         float cr = line_height;
-        al_draw_filled_circle(x - al_get_text_width(font, " player #X: XXX") - cr * 0.5, y + cr, cr, PlayerColors[p]);
+        al_draw_filled_circle(x - al_get_text_width(font, " player #X: XX") - cr * 0.5, y + cr, cr, PlayerColors[p]);
         char player_text[32];
-        sprintf_s(player_text, 32, "%splayer #%d: %3d", current_player == p ? "* " : "", p + 1, player_points[p]);
-        if (p == current_player) al_draw_filled_rounded_rectangle(x - al_get_text_width(font, player_text) - cr * 0.5, y, w + cr, y + line_height * 2, cr, cr, PlayerColors[current_player]);
+        sprintf_s(player_text, 32, "%splayer #%d: %2d", current_player == p ? "* " : "", p + 1, player_points[p]);
+        if (p == current_player) al_draw_filled_rounded_rectangle(x - al_get_text_width(font, player_text) - cr, y, w + cr, y + line_height * 2, cr, cr, PlayerColors[current_player]);
         al_draw_text(font, text_color, x - al_get_text_width(font, player_text), y, 0, player_text);
         //al_draw_text(font, current_player == p ? text_color : PlayerColors[p], x - al_get_text_width(font, player_text), y, 0, player_text);
         //char cp_text[4];
@@ -78,7 +78,7 @@ void draw_turn_info(ALLEGRO_DISPLAY* display, ALLEGRO_FONT* font, ALLEGRO_BITMAP
         y += margin + line_height;
     }
     char goal_text[32];
-    sprintf_s(goal_text, 32, "goal: %3d", goal);
+    sprintf_s(goal_text, 32, "score goal: %2d", goal);
     al_draw_text(font, text_color, x - al_get_text_width(font, goal_text), y, 0, goal_text);
     float og_w = al_get_bitmap_width(trophy);
     float og_h = al_get_bitmap_height(trophy);
@@ -102,9 +102,11 @@ void draw_cards(ALLEGRO_DISPLAY* display, ALLEGRO_FONT* font, int shift, const i
     float y = padding + margin + shift;
     float cr = line_height / 2;
 
+    int cards_sum = 0;
+    for (int i = 0; i < RESOURCES_COUNT; ++i) { cards_sum += cards[i]; }
     char text[32];
-    sprintf_s(text, 32, "%s:  ", title);
-    al_draw_filled_rounded_rectangle(-cr, y, margin + al_get_text_width(font, text), y + line_height, cr, cr, color);
+    sprintf_s(text, 32, "%s: %d", title, cards_sum);
+    al_draw_filled_rounded_rectangle(-cr, y, 2 * margin + al_get_text_width(font, text) + cr, y + line_height, cr, cr, color);
     al_draw_text(font, white, x, y, 0, text);
     y += margin + padding + line_height;
     x += margin;
@@ -118,6 +120,31 @@ void draw_cards(ALLEGRO_DISPLAY* display, ALLEGRO_FONT* font, int shift, const i
         al_draw_filled_rounded_rectangle(margin + padding, y, max_width + 3 * margin + padding, y + line_height, margin, margin, ResourceColor[i + 2]);
         al_draw_text(font, black, x, y, 0, name);
         al_draw_text(font, black, x + max_width - al_get_text_width(font, count), y, 0, count);
+        y += margin + line_height;
+    }
+}
+
+void draw_other_players_cards(ALLEGRO_DISPLAY* display, ALLEGRO_FONT* font, int current_player, const int MAX_PLAYERS, const int cards[4][5], ALLEGRO_COLOR* PlayerColors) {
+    ALLEGRO_COLOR white = al_map_rgb(255, 255, 255);
+    
+    float padding = 8.f;
+    float margin = 8.f;
+
+    float line_height = al_get_font_line_height(font);
+
+    float shift = 2 * ((line_height + margin) * (RESOURCES_COUNT + 1) + padding * 2);
+    float x = padding + margin;
+    float y = padding + margin + shift;
+    float cr = line_height / 2;
+
+    for (int p = 0; p < MAX_PLAYERS; ++p) {
+        if (p == current_player) continue;
+        int cards_sum = 0;
+        for (int i = 0; i < RESOURCES_COUNT; ++i) { cards_sum += cards[p][i]; }
+        char text[32];
+        sprintf_s(text, 32, "player #%d: %d", p + 1, cards_sum);
+        al_draw_filled_rounded_rectangle(-cr, y, 2 * margin + al_get_text_width(font, text) + cr, y + line_height, cr, cr, PlayerColors[p]);
+        al_draw_text(font, white, x, y, 0, text);
         y += margin + line_height;
     }
 }
