@@ -424,7 +424,7 @@ void generate_map(ALLEGRO_DISPLAY* display) {
 	}
 
 	#ifdef _DEBUG_GRID_EXTRA_OUT
-		printf("\n\033[33m[MAP] finished.\033[0m\n");
+		printf("\n\033[33m[MAP] finished.\033[0m\n\n");
 	#endif
 }
 

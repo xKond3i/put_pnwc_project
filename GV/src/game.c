@@ -31,6 +31,10 @@ bool init_game(ALLEGRO_DISPLAY* display, ALLEGRO_FONT* font)
 
     restart_game(display, font);
 
+    #ifdef _DEBUG_GRID_EXTRA_OUT
+        printf("\033[33m[GAME] logs:\033[0m\n\n");
+    #endif
+
     return true;
 }
 
@@ -72,8 +76,8 @@ void update_loop(ALLEGRO_EVENT* event, ALLEGRO_DISPLAY* display, ALLEGRO_FONT* f
     // ui
     draw_turn_info(display, font, trophy, dices, turn_nr, current_player, player_points, goal, MAX_PLAYERS, PlayerColors);
 
-    draw_bank_cards(display, font, &bank_cards);
-    draw_player_cards(display, font, &player_cards[current_player], PlayerColors[current_player]);
+    draw_bank_cards(display, font, bank_cards);
+    draw_player_cards(display, font, player_cards[current_player], PlayerColors[current_player]);
 
     if (turn_nr <= 2 * MAX_PLAYERS) {
         float margin = 16.f;
@@ -114,7 +118,9 @@ void handle_events(ALLEGRO_EVENT* event, bool* running)
         
         PLACEMENT v = board.placements[idx];
         if (v.active == false) return;
-        float d = sqrt((v.x - norm_mx) * (v.x - norm_mx) + (v.y - norm_my) * (v.y - norm_my));
+        float dx = (v.x - norm_mx);
+        float dy = (v.y - norm_my);
+        float d = sqrtf(dx * dx + dy * dy);
         if (d > MAP_CELL_SIZE * 0.1) { selected = -1; return; }
         
         if (board.placements[idx].player == NOONE || board.placements[idx].player == current_player) {
@@ -128,18 +134,35 @@ void handle_events(ALLEGRO_EVENT* event, bool* running)
                 bool first_turns = turn_nr <= (2 * MAX_PLAYERS);
                 // check if player has resources for a house
                 bool has_resources = true;
-                if (player_cards[current_player][WOOD] < 1 || player_cards[current_player][BRICK] < 1 || player_cards[current_player][WHEAT] < 1 || player_cards[current_player][SHEEP] < 1) has_resources = false;
+                int* cpc = player_cards[current_player];
+                if (cpc[WOOD] < 1 || cpc[BRICK] < 1 || cpc[WHEAT] < 1 || cpc[SHEEP] < 1) { has_resources = false; }
                 PLACEMENT v = board.placements[selected];
                 // check if neighbors are free
                 bool neighbors_free = true;
                 for (int i = 0; i < 3; ++i) {
-                    if (board.placements[v.neighbors[i]].player != NOONE) neighbors_free = false;
+                    if (v.neighbors[i] == -1) continue;
+                    if (board.placements[v.neighbors[i]].player == NOONE) continue;
+                    neighbors_free = false;
+                    break;
                 }
-                if (neighbors_free && (has_resources || first_turns)) {
-                    board.placements[selected].building = TENT;
-                    board.placements[selected].player = current_player;
-                    player_points[current_player]++;
-                    next_turn();
+                // if all conditions met - place tent/house
+                if (neighbors_free) {
+                    if (has_resources || first_turns) {
+                        board.placements[selected].building = TENT;
+                        board.placements[selected].player = current_player;
+                        player_points[current_player]++;
+                        next_turn();
+                    }
+                    else {
+                        #if _DEBUG
+                            if (!first_turns) printf("player #%d has not enough resources to build a house!\n", current_player + 1);
+                        #endif
+                    }
+                }
+                else {
+                    #if _DEBUG
+                        printf("houses can't be a direct neighbors!\n");
+                    #endif
                 }
             }
         }
