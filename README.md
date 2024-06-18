@@ -1,16 +1,22 @@
-![Logo](logo_mini.png)
-
 # GROW A VILLAGE
+**Poznan University of Technology 🎓** \
+*Low-Level Programming in C* \
+Project developed with ❤ by **Konrad Ceglarski** ([@xKond3i](https://github.com/xkond3i))
 
-**"GROW A VILLAGE"** [version IN-DEV]\
+<img src="resources/logo_mini.png" width=128>
+
+## About
+**"Grow a Village"** [version IN-DEV] \
 Simple digital clone of a "[CATAN](https://en.wikipedia.org/wiki/Catan)" board game or a digital counterpart "[colonist.io](https://colonist.io/)" with a few twists. \
 The rules are simple: roll the dice
 gather and manage resources, buy and build roads and houses. 🎲 \
 The goal is to claim the victory by developing the greatest village on the map. 👑
 
-## Preview
 
-  ![Preview](preview.png)
+## Screenshots
+
+  ![Preview](resources/preview.png)
+
 
 ## Maps File Format
 Map is defined in a CSV (Comma Separated Values) file named "map.csv". \
@@ -32,9 +38,6 @@ keycode | field type
 "4"     | ORE
 "5"     | SHEEP
 
-## Powered by
-
-  [![Allegro Game Programming Library logo](https://liballeg.org/images/logo.png)](https://liballeg.org/)
 
 ## Acknowledgments
 
@@ -42,7 +45,6 @@ keycode | field type
   - **[COLONIST.IO](https://colonist.io/)** — digital counterpart
   - **[FIRACODE](https://github.com/tonsky/FiraCode)** — font used in the project
 
-### <!-- Footer -->
-**Poznan University of Technology 🎓** \
-*Low-Level Programming in C* \
-Project developed with ❤ by **Konrad Ceglarski** [@xKond3i](https://github.com/xkond3i)
+Powered by **Allegro** \
+[![Allegro Game Programming Library logo](resources/allegro_logo.png)](https://liballeg.org/)
+<!-- [![Allegro Game Programming Library logo](https://liballeg.org/images/logo.png)](https://liballeg.org/) -->
