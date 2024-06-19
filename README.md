@@ -12,6 +12,10 @@ The rules are simple: roll the dice
 gather and manage resources, buy and build roads and houses. 🎲 \
 The goal is to claim the victory by developing the greatest village on the map. 👑
 
+> [!CAUTION]
+> Work on the project has been suspended. \
+> State: incomplete and core features missing.
+
 
 ## Screenshots
 
